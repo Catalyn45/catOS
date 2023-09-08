@@ -2,8 +2,6 @@
 %define STACK 0x9000
 %define KERNEL 0x1000
 
-[bits 16]
-
 [org ORG]
 
 mov bp, STACK ; setup stack
@@ -24,29 +22,17 @@ load_kernel:
 
     jmp $
 
-[bits 32]
-main:
-    mov ebx, msg
-    call print_string_pm ; Note that this will be written at the top left corner
-
-    call KERNEL
-
-forever:
-    hlt
-    jmp forever
-
-[bits 16]
-%include "boot/print.asm"
-%include "boot/disk.asm"
-%include "boot/gdt.asm"
-
-%include "boot/switch.asm"
-%include "boot/print_pm.asm"
-
-[bits 16]
 kernel_loaded: db "kernel loaded", 0
 kernel_loading: db "loading kernel", 0
 msg: db "32bit entered", 0
+
+%include "src/boot/print.asm"
+%include "src/boot/disk.asm"
+%include "src/boot/gdt.asm"
+%include "src/boot/switch.asm"
+
+%include "src/boot/start.asm"
+%include "src/boot/print_pm.asm"
 
 times 510-($-$$) db 0
 db 0x55, 0xaa

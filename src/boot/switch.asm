@@ -1,4 +1,3 @@
-[bits 16]
 switch:
     cli ; stop interupts
     lgdt [gdt_descriptor] ; load gdt descriptor
@@ -7,16 +6,3 @@ switch:
     mov cr0, eax
     jmp CODE_SEG:init ; far jump
 
-[bits 32]
-init:
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
-    mov ebp, 0x90000
-    mov esp, ebp
-
-    call main
