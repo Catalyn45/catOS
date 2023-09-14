@@ -6,8 +6,11 @@ ASM = nasm
 LD  = /usr/local/i386elfgcc/bin/i386-elf-ld
 GDB = /usr/local/i386elfgcc/bin/i386-elf-gdb
 
-C =$(shell find ./src -name "*.c")
+C=$(shell find ./src -name "*.c")
+ASM_FILES=$(shell find ./src -type f \( -name "*.asm" ! -iname "entry.o" ! -path "./src/boot/*" \))
+
 OBJ=$(patsubst %,obj/%.o,$(basename $(C)))
+OBJ+=$(patsubst %,obj/%.o, $(basename $(ASM_FILES)))
 
 default: image.bin
 
@@ -21,8 +24,11 @@ obj/./src/%.o: src/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -ffreestanding -o $@ -c $<
 
+obj/./src/%.o: src/%.asm
+	$(ASM) $(CFLAGS) $< -f elf -o $@
+
 kernel.bin: obj/src/kernel/entry.o $(OBJ)
-	$(LD) -s -o $@ -Ttext 0x1000 --oformat binary $^
+	$(LD) -S -o $@ -Ttext 0x1000 --oformat binary $^
 
 kernel.elf: obj/src/kernel/entry.o $(OBJ)
 	$(LD) -o $@ -Ttext 0x1000 $^
@@ -35,10 +41,10 @@ run: image.bin
 
 debug: image.bin kernel.elf
 	qemu-system-i386 -s -S -drive file=image.bin,format=raw&
-	$(GDB) -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
+	$(GDB) --command=commands.gdb
 
 clean:
-	rm *.bin *.elf
-	rm obj/src/kernel/entry.o
 	rm $(OBJ)
+	rm obj/src/kernel/entry.o
+	rm *.bin *.elf
 

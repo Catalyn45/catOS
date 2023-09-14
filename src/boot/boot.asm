@@ -12,7 +12,7 @@ load_kernel:
     call print
 
     push KERNEL
-    push 1
+    push 2
     call disk_read ; read 2 sectors
 
     push kernel_loaded

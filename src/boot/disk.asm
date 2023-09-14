@@ -15,7 +15,17 @@ disk_read:
 
     pop dx
 
+    jc disk_error
+
+    cmp al, [bp + 4]
+    jne disk_error
+
 disk_end:
     leave
 
     ret
+
+disk_error:
+disk_loop:
+    hlt
+    jmp disk_loop
